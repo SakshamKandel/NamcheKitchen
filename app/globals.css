@@ -99,3 +99,8 @@ body{background-color:var(--cream);background-image:none}
 @media(max-width:600px){.live-review-card{flex-basis:82vw}}
 
 .allergy-notice{display:grid;grid-template-columns:minmax(220px,.7fr) 1.3fr;gap:8%;align-items:start;background:var(--cream);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.allergy-notice h2{font-size:clamp(2rem,3.2vw,3.4rem);margin:0}.allergy-notice p{margin:0;color:var(--muted);max-width:68ch}.allergy-notice .eyebrow{color:var(--green)}@media(max-width:800px){.allergy-notice{grid-template-columns:1fr;gap:18px;padding-top:58px;padding-bottom:58px}}
+
+.live-review-card{height:360px;overflow:hidden}
+.live-review-card p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:6;overflow:hidden}
+.live-review-card>a{margin-top:auto;flex-shrink:0}
+@media(max-width:600px){.live-review-card{height:340px}.live-review-card p{-webkit-line-clamp:5}}
