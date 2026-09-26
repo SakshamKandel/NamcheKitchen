@@ -81,3 +81,5 @@ body{background-color:var(--cream);background-image:none}
 .live-reviews-track{align-items:flex-start}
 .live-review-card{min-height:0;height:auto}
 @media(max-width:800px){.review-section{padding:52px 5% 46px}.live-reviews{padding:16px}}
+
+.image-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.image-actions .danger{color:#9b3d32;border-color:#c8897d;background:transparent}.image-actions .danger:hover{background:#9b3d3212}
