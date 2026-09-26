@@ -1,3 +1,12 @@
-import { ArrowUpRight } from 'lucide-react';
-import { sql } from '@/lib/db';
-export default async function Reviews(){const reviews=await sql`select * from namche.reviews order by sort_order`;return <section className="review-section"><div className="section-heading"><div><span className="eyebrow">KIND WORDS FROM OUR TABLE</span><h2>Good food.<br/><em>Happy people.</em></h2></div><div><p>Stories from guests who’ve shared a meal with us.</p><a className="text-link" href="https://www.google.com/maps/search/?api=1&query=Namche+Kitchen+1230+Wellington+Ottawa" target="_blank" rel="noreferrer">Find us on Google <ArrowUpRight size={18}/></a></div></div><div className="review-grid">{reviews.map(r=><article className="review-card" key={r.id}><div className="review-stars" aria-label={`${r.rating} out of 5 stars`}>★★★★★</div><blockquote>“{r.excerpt}”</blockquote><div className="review-person"><img src={'/api/images/'+r.image_id} alt={r.name} loading="lazy"/><div><strong>{r.name}</strong><small>Google review</small></div></div><details><summary>Read full review</summary><p>{r.body}</p></details></article>)}</div><p className="small-note">Selected Google reviews shared by our guests. Excerpts shown above; expand each card to read the full review.</p></section>}
+import Script from 'next/script';
+
+export default function Reviews(){
+  return <section className="review-section">
+    <div className="section-heading">
+      <div><span className="eyebrow">KIND WORDS FROM OUR TABLE</span><h2>Good food.<br/><em>Happy people.</em></h2></div>
+      <div><p>Live Google reviews from guests who’ve shared a meal with us.</p><a className="text-link" href="https://www.google.com/maps/search/?api=1&query=Namche+Kitchen+1230+Wellington+Ottawa" target="_blank" rel="noreferrer">Find us on Google <span aria-hidden="true">↗</span></a></div>
+    </div>
+    <div className="sk-ww-google-reviews review-widget" data-embed-id="25717250" />
+    <Script src="https://widgets.sociablekit.com/google-reviews/widget.js" strategy="afterInteractive" />
+  </section>
+}
