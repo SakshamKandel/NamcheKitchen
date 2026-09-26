@@ -63,3 +63,4 @@ body{background-color:var(--cream);background-image:none}
 .header .brand img{width:64px;height:64px}.header{min-height:78px}.header .brand{min-width:64px}.header .brand img{object-fit:contain}
 @media(max-width:900px){.header .brand img{width:54px;height:54px}.header{min-height:66px}}
 .hero .eyebrow{font-size:15px;letter-spacing:2.8px}
+.chef-copy h2 em{color:var(--green)}
