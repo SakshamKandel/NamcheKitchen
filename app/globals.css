@@ -67,3 +67,4 @@ body{background-color:var(--cream);background-image:none}
 .welcome h2 em{color:var(--green)}
 
 .welcome h2{font-size:clamp(3rem,4.8vw,4.8rem)}@media(max-width:800px){.welcome h2{font-size:34px}}@media(max-width:480px){.welcome h2{font-size:32px}}
+.review-widget{max-width:1180px;max-height:700px;margin:0 auto;overflow:auto;border-radius:8px}
