@@ -64,4 +64,5 @@ body{background-color:var(--cream);background-image:none}
 @media(max-width:900px){.header .brand img{width:54px;height:54px}.header{min-height:66px}}
 .hero .eyebrow{font-size:15px;letter-spacing:2.8px}
 .chef-copy h2 em{color:var(--green)}
+.welcome h2 em{color:var(--green)}
 
