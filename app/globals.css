@@ -97,3 +97,5 @@ body{background-color:var(--cream);background-image:none}
 .live-review-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;margin-bottom:-44px;position:relative;z-index:1}
 .live-review-photo+.live-review-header{padding-left:56px;min-height:44px}
 @media(max-width:600px){.live-review-card{flex-basis:82vw}}
+
+.allergy-notice{display:grid;grid-template-columns:minmax(220px,.7fr) 1.3fr;gap:8%;align-items:start;background:var(--cream);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.allergy-notice h2{font-size:clamp(2rem,3.2vw,3.4rem);margin:0}.allergy-notice p{margin:0;color:var(--muted);max-width:68ch}.allergy-notice .eyebrow{color:var(--green)}@media(max-width:800px){.allergy-notice{grid-template-columns:1fr;gap:18px;padding-top:58px;padding-bottom:58px}}
