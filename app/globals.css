@@ -90,3 +90,10 @@ body{background-color:var(--cream);background-image:none}
 .live-reviews{height:fit-content!important;min-height:0!important;display:block}
 .live-reviews-viewport,.live-reviews-track{height:auto!important;min-height:0!important}
 @media(max-width:800px){.review-section{padding-top:38px;padding-bottom:34px}}
+
+.live-reviews-viewport{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#a8b599 transparent;padding-bottom:4px}
+.live-reviews-track{width:max-content;align-items:flex-start}
+.live-review-card{flex:0 0 min(320px,78vw);align-self:flex-start}
+.live-review-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;margin-bottom:-44px;position:relative;z-index:1}
+.live-review-photo+.live-review-header{padding-left:56px;min-height:44px}
+@media(max-width:600px){.live-review-card{flex-basis:82vw}}
