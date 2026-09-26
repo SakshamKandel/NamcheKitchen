@@ -108,3 +108,5 @@ body{background-color:var(--cream);background-image:none}
 .live-reviews{background:transparent;border-radius:0;padding:0;overflow:visible}
 .live-reviews-viewport{padding:0 2px 6px}
 @media(max-width:600px){.live-reviews{padding:0}}
+
+.google-summary{color:var(--cream)}.google-summary-name,.google-rating{color:var(--cream)}.google-summary small{color:#d0dbcb}
