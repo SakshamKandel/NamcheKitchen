@@ -72,3 +72,12 @@ body{background-color:var(--cream);background-image:none}
 
 
 .crop-overlay{position:fixed;inset:0;z-index:70;background:#071e17d9;display:grid;place-items:center;padding:24px}.crop-editor{width:min(720px,100%);background:var(--cream);padding:24px;color:var(--green);box-shadow:0 20px 60px #0006}.crop-stage{position:relative;height:min(58vh,520px);background:#102a23}.crop-zoom{display:flex;align-items:center;gap:14px;margin:18px 0 0;font-size:13px;font-weight:600}.crop-zoom input{flex:1}.crop-editor .editor-actions{margin-top:18px}@media(max-width:600px){.crop-overlay{padding:12px}.crop-editor{padding:16px}.crop-stage{height:52vh}}
+
+
+/* Compact live reviews layout */
+.review-section{padding:68px 4.5% 58px}
+.review-section .section-heading{margin-bottom:28px}
+.live-reviews{width:100%;max-width:1440px;padding:20px 22px}
+.live-reviews-track{align-items:flex-start}
+.live-review-card{min-height:0;height:auto}
+@media(max-width:800px){.review-section{padding:52px 5% 46px}.live-reviews{padding:16px}}
