@@ -1,0 +1,2 @@
+import { sql } from '@/lib/db';
+export async function GET(_request:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;const rows=await sql`select mime,data from namche.images where id=${id}`;if(!rows.length)return new Response('Not found',{status:404});return new Response(new Uint8Array(rows[0].data),{headers:{'Content-Type':rows[0].mime,'Cache-Control':'public, max-age=86400, immutable','X-Content-Type-Options':'nosniff'}});}

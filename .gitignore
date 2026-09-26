@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.env*
+!.env.example
+.neon
+.neon/
+.credentials/
+test-results/
+playwright-report/
+*.tsbuildinfo

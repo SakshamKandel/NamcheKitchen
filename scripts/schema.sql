@@ -1,0 +1,8 @@
+CREATE SCHEMA IF NOT EXISTS namche;
+CREATE TABLE IF NOT EXISTS namche.images (id text PRIMARY KEY, mime text NOT NULL, data bytea NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS namche.menu_items (id text PRIMARY KEY, name text NOT NULL, description text NOT NULL DEFAULT '', category text NOT NULL, kind text NOT NULL DEFAULT 'food' CHECK(kind IN ('food','drink')), price numeric(8,2) CHECK(price>=0), price_note text NOT NULL DEFAULT '', image_id text REFERENCES namche.images(id), available boolean NOT NULL DEFAULT true, featured boolean NOT NULL DEFAULT false, sort_order integer NOT NULL DEFAULT 0, updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS namche.admins (id text PRIMARY KEY, username text UNIQUE NOT NULL, password_hash text NOT NULL);
+CREATE TABLE IF NOT EXISTS namche.sessions (token_hash text PRIMARY KEY, admin_id text NOT NULL REFERENCES namche.admins(id), expires_at timestamptz NOT NULL);
+CREATE TABLE IF NOT EXISTS namche.reservations (id uuid PRIMARY KEY, name text NOT NULL, email text NOT NULL, phone text NOT NULL, date date NOT NULL, time time NOT NULL, guests integer NOT NULL CHECK(guests BETWEEN 1 AND 20), notes text NOT NULL DEFAULT '', status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','confirmed','cancelled','completed')), created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS reservations_date_idx ON namche.reservations(date);
+CREATE TABLE IF NOT EXISTS namche.rate_limits (key text PRIMARY KEY, count integer NOT NULL DEFAULT 1, expires_at timestamptz NOT NULL);

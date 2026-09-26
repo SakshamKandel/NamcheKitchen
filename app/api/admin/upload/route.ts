@@ -1,0 +1,5 @@
+import { sql } from '@/lib/db';
+import { session,sameOrigin } from '@/lib/auth';
+import { randomUUID } from 'node:crypto';
+import sharp from 'sharp';
+export async function POST(request:Request){try{if(!sameOrigin(request)||!await session())return new Response(null,{status:401});if(Number(request.headers.get('content-length'))>6*1024*1024)return Response.json({error:'Image must be under 5 MB.'},{status:413});const file=(await request.formData()).get('image');if(!(file instanceof File)||file.size>5*1024*1024||!['image/jpeg','image/png','image/webp'].includes(file.type))return Response.json({error:'Choose a JPG, PNG, or WebP under 5 MB.'},{status:400});const data=await sharp(Buffer.from(await file.arrayBuffer()),{limitInputPixels:40000000}).rotate().resize({width:1400,withoutEnlargement:true}).webp({quality:85}).toBuffer();const id=randomUUID();await sql`insert into namche.images(id,mime,data) values(${id},'image/webp',${data})`;return Response.json({id});}catch{return Response.json({error:'This image could not be uploaded.'},{status:400});}}
