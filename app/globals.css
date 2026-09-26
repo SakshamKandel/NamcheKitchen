@@ -104,3 +104,7 @@ body{background-color:var(--cream);background-image:none}
 .live-review-card p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:6;overflow:hidden}
 .live-review-card>a{margin-top:auto;flex-shrink:0}
 @media(max-width:600px){.live-review-card{height:340px}.live-review-card p{-webkit-line-clamp:5}}
+
+.live-reviews{background:transparent;border-radius:0;padding:0;overflow:visible}
+.live-reviews-viewport{padding:0 2px 6px}
+@media(max-width:600px){.live-reviews{padding:0}}
