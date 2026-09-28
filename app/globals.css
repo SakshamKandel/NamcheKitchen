@@ -167,3 +167,56 @@ body{background-color:var(--cream);background-image:none}
   .hero-actions .button { flex-basis: 100%; justify-content: space-between; }
   .carousel-controls button { width: 44px; height: 44px; }
 }
+
+/* A quieter mobile hero: one confident next step, with the image and message
+   doing the visual work. Secondary desktop actions remain available in the nav
+   and on their dedicated pages. */
+@media (max-width: 600px) {
+  .hero {
+    height: min(680px, 100svh);
+    min-height: 560px;
+  }
+
+  .hero-content {
+    padding: 118px 7% 54px;
+    align-self: flex-end;
+  }
+
+  .hero .eyebrow {
+    margin-bottom: 12px;
+    font-size: 10px;
+    letter-spacing: 1.6px;
+  }
+
+  .hero h1 {
+    max-width: 12ch;
+    margin: 12px 0 18px;
+    font-size: clamp(2.7rem, 12vw, 4rem);
+    line-height: 1.04;
+  }
+
+  .hero-content p {
+    max-width: 30ch;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .hero-actions {
+    margin-top: 24px;
+    display: block;
+  }
+
+  .hero-actions .button {
+    width: min(100%, 250px);
+    min-height: 48px;
+    padding: 13px 16px;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .hero-actions .outline,
+  .hero-actions .order-hero {
+    display: none;
+  }
+}
