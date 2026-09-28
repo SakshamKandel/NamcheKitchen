@@ -13,7 +13,7 @@ export type ReservationEmail = {
 };
 
 const sender = process.env.RESERVATION_EMAIL_FROM || process.env.SMTP_USER || 'connect@namchekitchen.ca';
-const owner = process.env.RESERVATION_OWNER_EMAIL || sender;
+const owner = process.env.RESERVATION_OWNER_EMAIL || 'namcheottawa@gmail.com';
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character] || character);
