@@ -54,3 +54,18 @@ export async function sendReservationEmails(reservation: ReservationEmail) {
   ]);
   return true;
 }
+
+export async function sendReservationStatusEmail(reservation: ReservationEmail) {
+  const transport = getTransport();
+  if (!transport) return false;
+  const statusCopy = {
+    confirmed: ['Your table is confirmed', 'Wonderful news — our team has confirmed your reservation. We look forward to welcoming you.'],
+    cancelled: ['Your reservation has been cancelled', 'Your reservation request has been cancelled. Please call us if you need help arranging another time.'],
+    completed: ['Thank you for dining with us', 'Thank you for visiting Namche Kitchen. We hope to welcome you back soon.'],
+    pending: ['Your reservation request is pending', 'Your reservation request is still awaiting confirmation from our team.'],
+  } as const;
+  const [title, intro] = statusCopy[reservation.status];
+  const html = layout(title, `Namaste ${escapeHtml(reservation.name)}, ${intro}`, `<table style="width:100%;border-collapse:collapse;margin:4px 0 22px">${reservationRows(reservation)}</table>`);
+  await transport.sendMail({ from: sender, to: reservation.email, replyTo: owner, subject: `Namche Kitchen · ${title}`, html, text: `${title}. ${intro} Reservation: ${reservation.date} at ${reservation.time}. Reference: ${reservation.id.slice(0, 8).toUpperCase()}.` });
+  return true;
+}
