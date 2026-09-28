@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-type ReservationEmail = {
+export type ReservationEmail = {
   id: string;
   name: string;
   email: string;
