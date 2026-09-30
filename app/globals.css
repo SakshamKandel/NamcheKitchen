@@ -62,7 +62,7 @@ body{background-color:var(--cream);background-image:none}
 .hero::after,.signature::before,.extra-section::before,.extra-section::after,.review-section::before,.review-section::after,.table-cta::before,.table-cta::after,footer::before,footer::after{content:none!important;display:none!important;mask-image:none!important}
 .header .brand img{width:64px;height:64px}.header{min-height:78px}.header .brand{min-width:64px}.header .brand img{object-fit:contain}
 @media(max-width:900px){.header .brand img{width:54px;height:54px}.header{min-height:66px}}
-.hero .eyebrow{font-size:15px;letter-spacing:2.8px}
+.hero .eyebrow{font-size:18px;letter-spacing:2.8px}
 .chef-copy h2 em{color:var(--green)}
 .welcome h2 em{color:var(--green)}
 
@@ -168,9 +168,7 @@ body{background-color:var(--cream);background-image:none}
   .carousel-controls button { width: 44px; height: 44px; }
 }
 
-/* A quieter mobile hero: one confident next step, with the image and message
-   doing the visual work. Secondary desktop actions remain available in the nav
-   and on their dedicated pages. */
+/* Keep menu browsing and online ordering within reach on mobile. */
 @media (max-width: 600px) {
   .hero {
     height: min(680px, 100svh);
@@ -184,7 +182,7 @@ body{background-color:var(--cream);background-image:none}
 
   .hero .eyebrow {
     margin-bottom: 12px;
-    font-size: 10px;
+    font-size: 14px;
     letter-spacing: 1.6px;
   }
 
@@ -204,7 +202,10 @@ body{background-color:var(--cream);background-image:none}
 
   .hero-actions {
     margin-top: 24px;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .hero-actions .button {
@@ -213,10 +214,10 @@ body{background-color:var(--cream);background-image:none}
     padding: 13px 16px;
     justify-content: space-between;
     font-size: 13px;
+    flex: 0 0 auto;
   }
 
-  .hero-actions .outline,
-  .hero-actions .order-hero {
+  .hero-actions .outline {
     display: none;
   }
 }
