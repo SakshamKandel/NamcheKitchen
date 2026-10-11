@@ -73,6 +73,16 @@ const DEFAULT_OPENROUTER_MODELS = [
   'openrouter/free',
 ] as const;
 
+/** Read a Hostinger/server-panel secret without treating pasted dotenv syntax as part of it. */
+function serverSecret(name: string) {
+  let value = process.env[name]?.trim() || '';
+  if (value.startsWith(`${name}=`)) value = value.slice(name.length + 1).trim();
+  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    value = value.slice(1, -1).trim();
+  }
+  return value;
+}
+
 /** Free OpenRouter models are the preferred provider for the private owner copilot. */
 export function openRouterModels() {
   const configured = (process.env.OPENROUTER_MODELS || '').split(',')
@@ -120,7 +130,7 @@ export async function completeGroq(
   messages: GroqMessage[],
   options: CompletionOptions = {},
 ): Promise<GroqCompletion> {
-  const apiKey = process.env.GROQ_API_KEY?.trim();
+  const apiKey = serverSecret('GROQ_API_KEY');
   if (!apiKey) throw new Error('GROQ_API_KEY is not configured.');
 
   let lastError: unknown;
@@ -180,7 +190,7 @@ export async function completeOpenRouter(
   messages: GroqMessage[],
   options: CompletionOptions = {},
 ): Promise<GroqCompletion> {
-  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+  const apiKey = serverSecret('OPENROUTER_API_KEY');
   if (!apiKey) throw new Error('OPENROUTER_API_KEY is not configured.');
 
   let lastError: unknown;
