@@ -1,4 +1,12 @@
+import { setDefaultAutoSelectFamily } from 'node:net';
 import postgres from 'postgres';
+
+// Neon publishes both IPv4 and IPv6 addresses. Some local Windows/Node
+// runtimes select an IPv6 address even when IPv6 routing is unavailable,
+// which leaves the connection stuck until the database timeout expires.
+// Prefer IPv4 for this server-side Postgres client; Neon remains the sole
+// source of menu and reservation data.
+setDefaultAutoSelectFamily(false);
 const globalDb = globalThis as unknown as { namcheSql?: ReturnType<typeof postgres> };
 export const sql = globalDb.namcheSql ?? postgres(process.env.DATABASE_URL_POOLED || process.env.DATABASE_URL || '', { ssl: 'require', max: 5, idle_timeout: 20, connect_timeout: 15 });
 if (process.env.NODE_ENV !== 'production') globalDb.namcheSql = sql;
