@@ -12,7 +12,7 @@ type OwnerProposal = { token: string; summary: string; tool: string };
 const publicWelcome =
   "Namaste! I can help you explore today’s menu and request a table. I can’t edit the menu or change restaurant content.";
 const ownerWelcome =
-  'Namaste. I can read and update menu names, descriptions, prices, availability, featured dishes, and food images. I will show a preview and wait for your confirmation button before saving.';
+  'Namaste. I can read your menu and prepare changes to names, descriptions, prices, availability, featured dishes, and food images. I will show you a review before anything is saved.';
 
 function Bubble({ message }: { message: ChatMessage }) {
   const lines = message.content.split(/\r?\n/);
@@ -85,7 +85,7 @@ function ChatPanel({ owner = false, onClose }: { owner?: boolean; onClose?: () =
 
   async function confirmProposal() {
     if (!owner || !proposal || busy) return;
-    const content = 'Confirmed from the owner button. Apply the proposed change.';
+    const content = 'I approve this proposed change. Please apply it.';
     const next = [...messages, { role: 'user' as const, content }];
     setMessages(next);
     setBusy(true);
@@ -142,7 +142,6 @@ function ChatPanel({ owner = false, onClose }: { owner?: boolean; onClose?: () =
           <img className="chat-logo" src="/api/images/logo" alt="Namche Kitchen" />
           <h2>{owner ? 'Manage your kitchen.' : 'How can we help?'}</h2>
           <p>{owner ? 'Menu and image operations stay behind your staff session.' : 'Menu questions and table requests.'}</p>
-          {owner && <div className="chat-permissions" aria-label="Owner assistant permissions"><span>READ</span><span className={proposal ? 'is-pending' : ''}>WRITE {proposal ? 'PENDING' : 'WITH CONFIRMATION'}</span></div>}
         </div>
         {onClose && <button className="chat-close" type="button" onClick={onClose} aria-label="Close assistant"><X size={19} /></button>}
       </header>
@@ -151,7 +150,7 @@ function ChatPanel({ owner = false, onClose }: { owner?: boolean; onClose?: () =
         {busy && <div className="chat-typing" role="status"><span /><span /><span /> Thinking…</div>}
         <div ref={endRef} />
       </div>
-      {owner && proposal && <div className="chat-confirm-card" role="group" aria-label="Proposed menu change"><span className="chat-confirm-label">PROPOSED CHANGE</span><strong>{proposal.summary}</strong><p>Review this database update before saving it.</p><div className="chat-confirm-actions"><button type="button" className="chat-confirm-primary" onClick={() => void confirmProposal()} disabled={busy}>Confirm &amp; save</button><button type="button" className="chat-confirm-cancel" onClick={() => setProposal(undefined)} disabled={busy}>Cancel</button></div></div>}
+      {owner && proposal && <div className="chat-confirm-card" role="group" aria-label="Proposed menu change"><span className="chat-confirm-label">PROPOSED CHANGE</span><strong>{proposal.summary}</strong><p>Review this menu change before saving it.</p><div className="chat-confirm-actions"><button type="button" className="chat-confirm-primary" onClick={() => void confirmProposal()} disabled={busy}>Confirm &amp; save</button><button type="button" className="chat-confirm-cancel" onClick={() => setProposal(undefined)} disabled={busy}>Cancel</button></div></div>}
       {messages.length === 1 && <div className="chat-suggestions">{suggestions.map(suggestion => <button key={suggestion} type="button" onClick={() => void sendMessage(suggestion)}>{suggestion}</button>)}</div>}
       {error && <p className="chat-error" role="alert">{error}</p>}
       <form className="chat-composer" onSubmit={event => { event.preventDefault(); void sendMessage(); }}>

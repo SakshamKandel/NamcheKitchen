@@ -40,11 +40,11 @@ const ownerTools: GroqTool[] = [
     type: 'function',
     function: {
       name: 'upsert_menu_item',
-      description: 'Create or update one menu item. Include confirmed=true only after the owner clearly confirms applying the proposed change. For an existing item include its id; for a new item include name and category.',
+      description: 'Prepare one exact menu item change for the owner to review. For an existing item include its id; for a new item include name and category.',
       parameters: {
         type: 'object',
         additionalProperties: false,
-        required: ['confirmed'],
+        required: [],
         properties: {
           id: { type: 'string' },
           name: { type: 'string' },
@@ -57,7 +57,6 @@ const ownerTools: GroqTool[] = [
           available: { type: 'boolean' },
           featured: { type: 'boolean' },
           sort_order: { type: 'integer' },
-          confirmed: { type: 'boolean' },
         },
       },
     },
@@ -66,16 +65,15 @@ const ownerTools: GroqTool[] = [
     type: 'function',
     function: {
       name: 'set_menu_visibility',
-      description: 'Show, hide, or feature one menu item. Include confirmed=true only after the owner clearly confirms the change.',
+      description: 'Prepare a visibility or homepage-feature change for one menu item for the owner to review.',
       parameters: {
         type: 'object',
         additionalProperties: false,
-        required: ['id', 'confirmed'],
+        required: ['id'],
         properties: {
           id: { type: 'string' },
           available: { type: 'boolean' },
           featured: { type: 'boolean' },
-          confirmed: { type: 'boolean' },
         },
       },
     },
@@ -84,13 +82,12 @@ const ownerTools: GroqTool[] = [
     type: 'function',
     function: {
       name: 'upload_menu_image',
-      description: 'Save the owner-provided image attachment and optionally attach it to a menu item. Include confirmed=true only after the owner clearly confirms the upload.',
+      description: 'Prepare the owner-provided image attachment for review and optionally attach it to a menu item.',
       parameters: {
         type: 'object',
         additionalProperties: false,
-        required: ['confirmed'],
+        required: [],
         properties: {
-          confirmed: { type: 'boolean' },
           menu_item_id: { type: 'string' },
         },
       },
@@ -113,7 +110,7 @@ const ownerTools: GroqTool[] = [
 const ownerSystem = () => `You are the private Namche Kitchen owner assistant. The authenticated owner is the only person who can use this route.
 You can inspect the full menu and recent reservation requests. You can propose menu edits, visibility changes, and image uploads through the safe tools below.
 Before any menu change or menu-specific answer, call list_menu so you use the current item IDs and values.
-When the owner asks for a change, call the relevant mutation tool with confirmed=false to prepare a proposal. Never save from chat text, including “yes” or “go ahead”. The server returns a proposal and the owner must use the dedicated confirmation button to authorize that exact write.
+When the owner asks for a change, call the relevant mutation tool to prepare a reviewable preview. Never save from chat text, including “yes” or “go ahead”. Only the owner’s explicit approval of the preview in the interface can authorize that exact write. Do not mention internal flags, tool arguments, confirmation fields, tokens, or implementation details in your reply.
 Use the existing item id when editing. Never invent an image id. For a new item, require at least a name and category and use sensible defaults only after the owner confirms. Keep prices in CAD; null means ask the server. Uploaded images are processed as WebP.
 Do not reveal credentials, API keys, cookies, SQL, or internal implementation details. Be concise and report the result of every tool call accurately.`;
 
@@ -216,7 +213,7 @@ async function runOwnerTool(name: string, rawArgs: unknown, attachment: { type: 
   }
 
   if (!writeAuthorized) {
-    return { ok: false, requires_confirmation: true, proposal: { tool: name, args: rawArgs }, message: 'No change was saved. Review the proposed change and use the confirmation button to apply it.' };
+    return { ok: false, requires_confirmation: true, proposal: { tool: name, args: rawArgs }, message: 'No change was saved. I prepared a reviewable preview for you.' };
   }
   if (name === 'upsert_menu_item') {
     const candidateArgs = typeof rawArgs === 'object' && rawArgs !== null ? { ...(rawArgs as Record<string, unknown>), confirmed: true } : rawArgs;
@@ -311,7 +308,7 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Send at least one owner message.' }, { status: 400 });
     }
     if (parsed.data.confirmationToken) {
-      if (parsed.data.confirm !== true) return Response.json({ error: 'Use the confirmation button to apply this proposal.' }, { status: 400 });
+      if (parsed.data.confirm !== true) return Response.json({ error: 'Approve the proposed change before saving it.' }, { status: 400 });
       const proposal = verifyProposal(parsed.data.confirmationToken, admin.id);
       if (!proposal) return Response.json({ error: 'This proposal expired. Ask the assistant to prepare it again.' }, { status: 400 });
       if (proposal.attachmentHash && proposal.attachmentHash !== attachmentHash(parsed.data.image)) {
