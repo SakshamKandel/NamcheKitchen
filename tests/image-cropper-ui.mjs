@@ -220,7 +220,7 @@ try {
   await expect(cropper.getByRole('button', { name: 'Use this crop', exact: true })).toBeEnabled();
   assertFit(await geometry());
   await assertViewport();
-  await setZoom(3);
+  await setZoom(Number(await page.getByRole('slider', { name: 'Zoom', exact: true }).getAttribute('max')));
   const selected = (await geometry()).crop;
   await page.mouse.move(selected.x + selected.width / 2, selected.y + selected.height / 2);
   await page.mouse.down();

@@ -29,7 +29,7 @@ Staff can add/edit menu entries, change prices/descriptions/categories, upload o
 
 Use **Menu categories** to add empty food or drinks categories, rename categories and their assigned items, or remove a category. Removing a populated category requires choosing another category for its items; hidden items are moved too. Categories added here remain available in the item editor even when empty, until removed.
 
-The homepage displays the first four featured available food items in display order. Uploads are limited to 5 MB JPG/PNG/WebP and re-encoded as WebP before storage in Neon.
+The homepage displays the first four featured available food items in display order. Uploads are limited to 5 MB JPG/PNG/WebP and re-encoded as WebP before storage in Neon. The image editor offers landscape, square, wide, portrait, and original crop shapes, 90-degree rotation, zoom buttons and slider, and **Keep full photo**. **Reset view** restores centered framing at 100% while keeping the selected shape and rotation; **Escape** closes the crop editor without closing the item editor.
 
 To stop new reservations for a full day, open **Reservations → Reservation availability**, select a date, optionally add a staff-only note, and click **Close this date**. Both signed-in admins and owners have access through the existing staff login. Use **Reopen date** to accept requests again. The public form and guest assistant respect the same dates, including requests submitted from an older open page. Dates follow Ottawa local time and the six-month booking window. Existing requests are retained; the panel shows how many pending or confirmed reservations need staff attention. Closing or reopening a day does not contact guests or change existing reservation statuses.
 
