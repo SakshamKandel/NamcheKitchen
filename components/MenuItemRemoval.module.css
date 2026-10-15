@@ -1,0 +1,26 @@
+.removal {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.removal p {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.danger {
+  color: #9b3d32;
+  border-color: #c8897d;
+  background: transparent;
+}
+
+.danger:hover {
+  background: #9b3d3212;
+}
