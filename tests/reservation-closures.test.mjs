@@ -61,7 +61,7 @@ test('isolated reservation closure API, chatbot, and concurrent writes', {
   const countEmail = async email => Number((await sql`select count(*)::int as count from namche.reservations where email=${email}`)[0].count);
   const track = id => { assert.ok(id); ownedIds.add(id); return id; };
   try {
-    const { createReservation, closeReservationDate } = await import('../lib/reservations.ts');
+    const { createReservation, createReservationResult, closeReservationDate } = await import('../lib/reservations.ts');
     const { createChatReservation } = await import('../lib/chat.ts');
     appSql = (await import('../lib/db.ts')).sql;
     const [admin] = await sql`select id from namche.admins where username=${process.env.TEST_ADMIN_USERNAME}`;
@@ -81,7 +81,7 @@ test('isolated reservation closure API, chatbot, and concurrent writes', {
     const [date, closeFirstDate, saveFirstDate] = dates;
 
     await t.test('staff availability requires sign-in and rejects cross-origin writes', async () => {
-      for (const method of ['GET', 'POST', 'DELETE']) {
+      for (const method of ['GET', 'POST', 'PATCH', 'DELETE']) {
         const response = await request('/api/admin/reservation-closures', method, method === 'GET' ? undefined : { date }, { auth: false });
         assert.equal(response.status, 401, method);
       }
@@ -98,7 +98,7 @@ test('isolated reservation closure API, chatbot, and concurrent writes', {
     await t.test('closure writes validate JSON, calendar dates, range, and reason length', async () => {
       const malformed = await request('/api/admin/reservation-closures', 'POST', undefined, { raw: '{' });
       assert.equal(malformed.status, 400);
-      for (const body of [{ date: 'not-a-date' }, { date: '2026-02-31' }, { date: '2000-01-01' }, { date: '2099-01-01' }, { date, reason: 'x'.repeat(301) }]) {
+      for (const body of [{ date: 'not-a-date' }, { date: '2026-02-31' }, { date: '2000-01-01' }, { date: '2099-01-01' }, { date, reason: 'x'.repeat(301) }, { date, public_reason: 'x'.repeat(301) }]) {
         assert.equal((await request('/api/admin/reservation-closures', 'POST', body)).status, 400);
       }
       assert.equal((await request('/api/admin/reservation-closures', 'DELETE', { date: '2026-02-31' })).status, 400);
@@ -126,10 +126,30 @@ test('isolated reservation closure API, chatbot, and concurrent writes', {
       assert.equal(publicResponse.status, 200);
       assert.match(publicResponse.headers.get('cache-control'), /no-store/);
       const availability = await publicResponse.json();
-      assert.deepEqual(Object.keys(availability).sort(), ['closedDates', 'maxDate', 'today']);
+      assert.deepEqual(Object.keys(availability).sort(), ['closedDates', 'closures', 'maxDate', 'today']);
       assert.ok(availability.closedDates.includes(date));
       assert.ok(availability.closedDates.every(value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)));
       assert.ok(!JSON.stringify(availability).includes(reason));
+      assert.deepEqual(availability.closures.find(row => row.date === date), { date, reason: '' });
+    });
+
+    await t.test('staff can edit an existing public closure explanation without exposing private notes', async () => {
+      const publicReason = 'Closed for a private event.';
+      const privateReason = 'Staff-only arrangements ' + run;
+      const edited = await request('/api/admin/reservation-closures', 'PATCH', { date, reason: privateReason, public_reason: publicReason });
+      assert.equal(edited.status, 200);
+      assert.equal((await edited.json()).activeReservations, 1);
+      const availability = await (await request('/api/reservations/availability', 'GET', undefined, { auth: false })).json();
+      assert.deepEqual(availability.closures.find(row => row.date === date), { date, reason: publicReason });
+      assert.ok(!JSON.stringify(availability).includes(privateReason));
+      const denied = await request('/api/reservations', 'POST', input(date, 'closed-public-reason'), { auth: false });
+      assert.equal(denied.status, 409);
+      const result = await denied.json();
+      assert.equal(result.reason, publicReason);
+      assert.ok(result.error.includes(publicReason));
+      assert.ok(!result.error.includes(privateReason));
+      assert.deepEqual(await createReservationResult(input(date, 'atomic-public-reason')), { id: null, closedReason: publicReason });
+      assert.equal((await request('/api/admin/reservation-closures', 'PATCH', { date: closeFirstDate, reason: '', public_reason: publicReason })).status, 404);
     });
 
     await t.test('public API and chatbot reject closed dates without saving a request', async () => {

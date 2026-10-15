@@ -1,12 +1,12 @@
 import { digest,rateLimit,sameOrigin } from '@/lib/auth';
 import { reservationSchema } from '@/lib/validation';
 import { sendReservationEmails } from '@/lib/email';
-import { createReservation, isReservationDateClosed } from '@/lib/reservations';
+import { createReservationResult, getReservationClosure } from '@/lib/reservations';
 import { CLOSED_DATE_MESSAGE } from '@/lib/reservation-dates';
 
 export const runtime = 'nodejs';
-function closedDateResponse() {
-  return Response.json({error:CLOSED_DATE_MESSAGE,code:'RESERVATION_DATE_CLOSED'},{status:409});
+function closedDateResponse(reason = '') {
+  return Response.json({error:reason ? `Reservations are closed on this date: ${reason} Please choose another day.` : CLOSED_DATE_MESSAGE,code:'RESERVATION_DATE_CLOSED',reason},{status:409});
 }
 
 export async function POST(request:Request) {
@@ -19,13 +19,14 @@ export async function POST(request:Request) {
     const parsed=reservationSchema.safeParse(input);
     if(!parsed.success) return Response.json({error:parsed.error.issues[0].message},{status:400});
     const data=parsed.data;
-    if(await isReservationDateClosed(data.date)) return closedDateResponse();
+    const closure=await getReservationClosure(data.date);
+    if(closure) return closedDateResponse(closure.reason);
     if(!await rateLimit('booking:'+digest(data.email.toLowerCase()),3,60)||!await rateLimit('bookings-global',100,60)) {
       return Response.json({error:'Too many requests. Please call us to arrange your table.'},{status:429});
     }
     // Recheck under the date lock in case staff closed it after the early check.
-    const id=await createReservation(data);
-    if(!id) return closedDateResponse();
+    const {id,closedReason}=await createReservationResult(data);
+    if(!id) return closedDateResponse(closedReason || '');
     try { await sendReservationEmails({...data,id,status:'pending'}); } catch(error) { console.error('Reservation email delivery failed',error); }
     return Response.json({id,message:'Your request is saved. Our team will contact you to confirm your table.'},{status:201});
   } catch {

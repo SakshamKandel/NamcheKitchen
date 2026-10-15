@@ -6,6 +6,7 @@ import styles from './ReservationForm.module.css';
 
 type Availability = {
   closedDates: string[];
+  closures: { date: string; reason: string }[];
   today: string;
   maxDate: string;
 };
@@ -31,6 +32,7 @@ export default function ReservationForm() {
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [availabilityStatus, setAvailabilityStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [rejectedDate, setRejectedDate] = useState('');
+  const [rejectedReason, setRejectedReason] = useState('');
   const availabilityRequest = useRef<AbortController | null>(null);
 
   const refreshAvailability = useCallback(async (force = false) => {
@@ -56,6 +58,11 @@ export default function ReservationForm() {
         !response.ok ||
         !Array.isArray(result.closedDates) ||
         !result.closedDates.every((date: unknown) => typeof date === 'string' && datePattern.test(date)) ||
+        (result.closures !== undefined && (!Array.isArray(result.closures) || !result.closures.every((closure: unknown) => {
+          if (!closure || typeof closure !== 'object') return false;
+          const item = closure as Record<string, unknown>;
+          return typeof item.date === 'string' && datePattern.test(item.date) && typeof item.reason === 'string' && item.reason.length <= 300;
+        }))) ||
         typeof result.today !== 'string' || !datePattern.test(result.today) ||
         typeof result.maxDate !== 'string' || !datePattern.test(result.maxDate) ||
         result.maxDate < result.today
@@ -67,10 +74,12 @@ export default function ReservationForm() {
         closedDates: [...new Set<string>(result.closedDates)]
           .filter(date => date >= result.today && date <= result.maxDate)
           .sort(),
+        closures: (result.closures || []).filter((closure: { date: string; reason: string }) => closure.date >= result.today && closure.date <= result.maxDate),
         today: result.today,
         maxDate: result.maxDate,
       });
       setRejectedDate('');
+      setRejectedReason('');
       setAvailabilityStatus('ready');
     } catch {
       if (availabilityRequest.current === controller && (!controller.signal.aborted || timedOut)) {
@@ -99,8 +108,9 @@ export default function ReservationForm() {
   const dateOutsideRange = Boolean(selectedDate && availability && (
     selectedDate < availability.today || selectedDate > availability.maxDate
   ));
+  const selectedClosureReason = availability?.closures.find(closure => closure.date === selectedDate)?.reason || (rejectedDate === selectedDate ? rejectedReason : '');
   const dateError = dateClosed
-    ? closedDateMessage
+    ? selectedClosureReason ? `Reservations are closed on this date. ${selectedClosureReason} Please choose another day.` : closedDateMessage
     : dateOutsideRange && availability
       ? `Please choose a date from ${formatDate(availability.today)} through ${formatDate(availability.maxDate)}.`
       : '';
@@ -121,6 +131,7 @@ export default function ReservationForm() {
       const result = await response.json();
       if (response.status === 409 && result.code === 'RESERVATION_DATE_CLOSED') {
         setRejectedDate(String(data.date));
+        setRejectedReason(typeof result.reason === 'string' ? result.reason : '');
         void refreshAvailability(true);
         return;
       }
@@ -161,16 +172,18 @@ export default function ReservationForm() {
         )}
         {closedDates.length > 0 && (
           <div>
-            <p><strong>Reservations are closed on:</strong>{' '}
-              {closedDates.slice(0, 3).map((date, index) => (
-                <span key={date}>{index > 0 && '; '}<time dateTime={date}>{formatDate(date)}</time></span>
-              ))}
-              {closedDates.length > 3 && `; and ${closedDates.length - 3} more dates`}.
-            </p>
+            <p><strong>Reservations are closed on:</strong></p>
+            <ul className={styles.closureList}>{closedDates.slice(0, 3).map(date => {
+              const reason = availability?.closures.find(closure => closure.date === date)?.reason;
+              return <li key={date}><time dateTime={date}>{formatDate(date)}</time>{reason && <span className={styles.closureReason}>{reason}</span>}</li>;
+            })}</ul>
             {closedDates.length > 3 && (
               <details className={styles.dates}>
                 <summary>View all {closedDates.length} closed dates</summary>
-                <ul>{closedDates.map(date => <li key={date}><time dateTime={date}>{formatDate(date)}</time></li>)}</ul>
+                <ul>{closedDates.map(date => {
+                  const reason = availability?.closures.find(closure => closure.date === date)?.reason;
+                  return <li key={date}><time dateTime={date}>{formatDate(date)}</time>{reason && <span className={styles.closureReason}>{reason}</span>}</li>;
+                })}</ul>
               </details>
             )}
           </div>

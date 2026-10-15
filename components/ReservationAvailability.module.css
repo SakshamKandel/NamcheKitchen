@@ -6,7 +6,7 @@
 .headingIcon{margin-top:5px;color:#6b826b}
 .notice{font-size:12px;line-height:1.7;max-width:none;margin:21px 0 24px;padding:13px 16px;background:#edf0e5;border-left:3px solid #84977b;color:#4d624e}
 .form{margin:0 0 26px}
-.fields{display:grid;grid-template-columns:minmax(180px,.75fr) minmax(220px,1.3fr) auto;align-items:end;gap:16px;border:0;padding:0;margin:0;min-width:0}
+.fields{display:grid;grid-template-columns:minmax(160px,.7fr) repeat(2,minmax(200px,1fr));align-items:end;gap:16px;border:0;padding:0;margin:0;min-width:0}
 .field{display:flex;flex-direction:column;gap:7px;font-weight:600;font-size:13px;min-width:0}
 .field input{width:100%;min-width:0;height:48px;padding:11px 12px;background:#fffef9;color:var(--green);border:1px solid #bcc8b5;border-radius:0;font-size:14px}
 .field input:focus-visible{outline:2px solid #7a8e6d;outline-offset:2px}
@@ -17,7 +17,7 @@
 .secondaryButton{background:transparent;color:var(--green);flex-shrink:0}
 .secondaryButton:hover:enabled{background:#edf0e5}
 .primaryButton:disabled,.secondaryButton:disabled,.fields:disabled{opacity:.65}
-.hints{display:grid;grid-template-columns:minmax(180px,.75fr) minmax(220px,1.3fr) auto;gap:16px;margin-top:7px}
+.hints{display:grid;grid-template-columns:minmax(160px,.7fr) repeat(2,minmax(200px,1fr));gap:16px;margin-top:7px}
 .hints p{font-size:11px;line-height:1.5;color:var(--muted);margin:0}
 .listHeading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:1px solid var(--line);padding-top:20px;margin-bottom:14px}
 .listHeading h3{font-size:15px;line-height:1.5;margin:0}
@@ -42,5 +42,7 @@
 .error,.loadError{background:#ffefe8;border:1px solid #e5b8a7;color:#a03022}
 .loadError{display:flex;justify-content:space-between;align-items:center;gap:18px}
 .errorText{font-size:13px;margin:0}
+.formActions{grid-column:1/-1;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}.dateActions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}.editHeading{font-size:17px;margin-bottom:17px}
+@media(max-width:800px){.closedDate{align-items:flex-start;flex-direction:column;gap:14px}.dateActions{width:100%}}
 @media(max-width:1000px){.fields{grid-template-columns:minmax(160px,.75fr) minmax(220px,1.3fr)}.primaryButton{grid-column:1/-1;justify-self:start}.hints{grid-template-columns:1fr;gap:3px}}
 @media(max-width:600px){.panel{padding:20px 16px;margin-bottom:24px}.heading{gap:12px}.heading h2{font-size:25px}.heading p{font-size:13px}.headingIcon{width:24px;height:24px}.notice{margin:18px 0;padding:11px 12px}.fields{grid-template-columns:minmax(0,1fr);gap:14px}.primaryButton{width:100%}.closedDate{align-items:flex-start;flex-direction:column;gap:13px;padding:17px 0}.closedDate .secondaryButton{width:100%}.listHeading{gap:10px}.listHeading h3{font-size:14px}.loadError{align-items:flex-start;flex-direction:column;gap:10px}.loadError .secondaryButton{align-self:stretch}.empty{gap:10px}}
