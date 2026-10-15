@@ -10,6 +10,7 @@ export type ReservationEmail = {
   guests: number;
   notes: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  cancellation_note?: string;
 };
 
 const sender = process.env.RESERVATION_EMAIL_FROM || process.env.SMTP_USER || 'connect@namchekitchen.ca';
@@ -65,7 +66,9 @@ export async function sendReservationStatusEmail(reservation: ReservationEmail) 
     pending: ['Your reservation request is pending', 'Your reservation request is still awaiting confirmation from our team.'],
   } as const;
   const [title, intro] = statusCopy[reservation.status];
-  const html = layout(title, `Namaste ${escapeHtml(reservation.name)}, ${intro}`, `<table style="width:100%;border-collapse:collapse;margin:4px 0 22px">${reservationRows(reservation)}</table>`);
-  await transport.sendMail({ from: sender, to: reservation.email, replyTo: owner, subject: `Namche Kitchen · ${title}`, html, text: `${title}. ${intro} Reservation: ${reservation.date} at ${reservation.time}. Reference: ${reservation.id.slice(0, 8).toUpperCase()}.` });
+  const cancellationNote = reservation.status === 'cancelled' ? reservation.cancellation_note?.trim() : '';
+  const reasonHtml = cancellationNote ? `<div style="border-left:3px solid #e9b461;padding:10px 14px;background:#f7f4eb;color:#526259;font-size:14px;line-height:1.6"><strong>Reason for cancellation</strong><br/>${escapeHtml(cancellationNote).replace(/\r\n|\r|\n/g, '<br/>')}</div>` : '';
+  const html = layout(title, `Namaste ${escapeHtml(reservation.name)}, ${intro}`, `<table style="width:100%;border-collapse:collapse;margin:4px 0 22px">${reservationRows(reservation)}</table>${reasonHtml}`);
+  await transport.sendMail({ from: sender, to: reservation.email, replyTo: owner, subject: `Namche Kitchen · ${title}`, html, text: `${title}. ${intro} Reservation: ${reservation.date} at ${reservation.time}. Reference: ${reservation.id.slice(0, 8).toUpperCase()}.${cancellationNote ? `\n\nReason for cancellation: ${cancellationNote}` : ''}` });
   return true;
 }

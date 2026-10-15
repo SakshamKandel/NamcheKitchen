@@ -1,0 +1,45 @@
+.control {
+  min-width: 0;
+  max-width: 360px;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  color: var(--green);
+  font: inherit;
+}
+
+.help {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.savedNote {
+  margin-top: 14px;
+  padding: 12px;
+  border-left: 3px solid var(--gold);
+  background: var(--cream);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.savedNote p {
+  white-space: pre-wrap;
+}

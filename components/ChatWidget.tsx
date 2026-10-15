@@ -48,7 +48,10 @@ function ChatPanel({ owner = false, onClose }: { owner?: boolean; onClose?: () =
   const [proposal, setProposal] = useState<OwnerProposal | undefined>();
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, busy]);
+  useEffect(() => {
+    const container = endRef.current?.parentElement;
+    container?.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+  }, [messages, busy]);
 
   async function sendMessage(value = input) {
     const content = value.trim();
@@ -166,9 +169,41 @@ function ChatPanel({ owner = false, onClose }: { owner?: boolean; onClose?: () =
 
 export default function PublicChatWidget() {
   const [open, setOpen] = useState(false);
+  const widgetRef = useRef<HTMLDivElement>(null);
   const path = usePathname();
+
+  useEffect(() => {
+    const widget = widgetRef.current;
+    const footer = document.getElementById('footer-utilities');
+    if (!widget || !footer) return;
+
+    let frame = 0;
+    const position = () => {
+      frame = 0;
+      const gap = window.matchMedia('(max-width: 800px)').matches ? 12 : 24;
+      const clearance = window.innerHeight - footer.getBoundingClientRect().top + 12;
+      const bottom = Math.max(gap, Math.min(clearance, window.innerHeight - 140));
+      widget.style.setProperty('--chat-bottom', `${bottom}px`);
+    };
+    const schedulePosition = () => {
+      if (!frame) frame = window.requestAnimationFrame(position);
+    };
+    const observer = new ResizeObserver(schedulePosition);
+    observer.observe(footer);
+    window.addEventListener('scroll', schedulePosition, { passive: true });
+    window.addEventListener('resize', schedulePosition);
+    position();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', schedulePosition);
+      window.removeEventListener('resize', schedulePosition);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [path]);
+
   if (path === '/admin' || path.startsWith('/admin/')) return null;
-  return <div className="chat-widget"><button className={`chat-launcher ${open ? 'is-open' : ''}`} type="button" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="public-chat-panel"><MessageCircle size={21} /><span>{open ? 'Close chat' : 'Chat with us'}</span>{open && <ChevronDown size={17} />}</button>{open && <div id="public-chat-panel"><ChatPanel onClose={() => setOpen(false)} /></div>}</div>;
+  return <div className="chat-widget" ref={widgetRef}><button className={`chat-launcher ${open ? 'is-open' : ''}`} type="button" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="public-chat-panel"><MessageCircle size={21} /><span>{open ? 'Close chat' : 'Chat with us'}</span>{open && <ChevronDown size={17} />}</button>{open && <div id="public-chat-panel"><ChatPanel onClose={() => setOpen(false)} /></div>}</div>;
 }
 
 export function OwnerChatAssistant() {
