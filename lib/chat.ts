@@ -5,6 +5,8 @@ import { digest, rateLimit } from '@/lib/auth';
 import { sql, type MenuItem } from '@/lib/db';
 import { reservationSchema } from '@/lib/validation';
 import { sendReservationEmails } from '@/lib/email';
+import { createReservation, isReservationDateClosed } from './reservations';
+import { CLOSED_DATE_MESSAGE } from './reservation-dates';
 
 export const chatMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
@@ -137,6 +139,9 @@ export async function createChatReservation(
     return { ok: false, message: parsed.error.issues[0]?.message || 'Please provide all reservation details.' };
   }
   const data = parsed.data;
+  if (await isReservationDateClosed(data.date)) {
+    return { ok: false, message: CLOSED_DATE_MESSAGE };
+  }
   if (!data.confirmed || !hasExplicitConfirmation(latestUserMessage)) {
     return {
       ok: false,
@@ -148,8 +153,8 @@ export async function createChatReservation(
     || !await rateLimit('bookings-global', 100, 60)) {
     return { ok: false, message: 'Too many reservation requests right now. Please call us to arrange your table.' };
   }
-  const id = randomUUID();
-  await sql`insert into namche.reservations(id,name,email,phone,date,time,guests,notes) values(${id},${data.name},${data.email.toLowerCase()},${data.phone},${data.date},${data.time},${data.guests},${data.notes})`;
+  const id = await createReservation(data);
+  if (!id) return { ok: false, message: CLOSED_DATE_MESSAGE };
   try {
     await sendReservationEmails({ ...data, id, status: 'pending' });
   } catch (error) {

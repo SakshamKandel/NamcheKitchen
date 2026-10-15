@@ -7,6 +7,7 @@ import {
   createChatReservation,
 } from '@/lib/chat';
 import { compactPublicMenuContext, publicChatMessages, publicConversationHistory } from '@/lib/public-chat';
+import { closedReservationDates } from '@/lib/reservations';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -61,8 +62,8 @@ export async function POST(request: Request) {
     // browser history as context only; authoritative menu data stays in DB.
     const incoming = publicConversationHistory(parsed.data.messages);
     const latestUserMessage = [...incoming].reverse().find(item => item.role === 'user')?.content || '';
-    const menu = await availableMenuItems();
-    const messages: GroqMessage[] = publicChatMessages(compactPublicMenuContext(menu), incoming);
+    const [menu, availability] = await Promise.all([availableMenuItems(), closedReservationDates()]);
+    const messages: GroqMessage[] = publicChatMessages(compactPublicMenuContext(menu), incoming, availability.closedDates);
     let completion = await completeGroq(messages, { tools: [reservationTool], parallelToolCalls: false, maxTokens: 800, temperature: 0.2 });
     const toolCalls = completion.message.tool_calls || [];
     if (!toolCalls.length) {

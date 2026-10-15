@@ -5,4 +5,5 @@ CREATE TABLE IF NOT EXISTS namche.admins (id text PRIMARY KEY, username text UNI
 CREATE TABLE IF NOT EXISTS namche.sessions (token_hash text PRIMARY KEY, admin_id text NOT NULL REFERENCES namche.admins(id), expires_at timestamptz NOT NULL);
 CREATE TABLE IF NOT EXISTS namche.reservations (id uuid PRIMARY KEY, name text NOT NULL, email text NOT NULL, phone text NOT NULL, date date NOT NULL, time time NOT NULL, guests integer NOT NULL CHECK(guests BETWEEN 1 AND 20), notes text NOT NULL DEFAULT '', status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','confirmed','cancelled','completed')), created_at timestamptz NOT NULL DEFAULT now());
 CREATE INDEX IF NOT EXISTS reservations_date_idx ON namche.reservations(date);
+CREATE TABLE IF NOT EXISTS namche.reservation_closures (date date PRIMARY KEY, reason text NOT NULL DEFAULT '' CHECK (char_length(reason) <= 300), created_by text REFERENCES namche.admins(id) ON DELETE SET NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE IF NOT EXISTS namche.rate_limits (key text PRIMARY KEY, count integer NOT NULL DEFAULT 1, expires_at timestamptz NOT NULL);

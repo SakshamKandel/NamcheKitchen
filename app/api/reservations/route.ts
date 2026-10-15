@@ -1,8 +1,34 @@
-import { randomUUID } from 'node:crypto';
-import { sql } from '@/lib/db';
 import { digest,rateLimit,sameOrigin } from '@/lib/auth';
 import { reservationSchema } from '@/lib/validation';
 import { sendReservationEmails } from '@/lib/email';
+import { createReservation, isReservationDateClosed } from '@/lib/reservations';
+import { CLOSED_DATE_MESSAGE } from '@/lib/reservation-dates';
 
 export const runtime = 'nodejs';
-export async function POST(request:Request){try{if(!sameOrigin(request))return Response.json({error:'Invalid request origin.'},{status:403});const raw=await request.text();if(raw.length>6000)return Response.json({error:'Request is too large.'},{status:413});const parsed=reservationSchema.safeParse(JSON.parse(raw));if(!parsed.success)return Response.json({error:parsed.error.issues[0].message},{status:400});const data=parsed.data;if(!await rateLimit('booking:'+digest(data.email.toLowerCase()),3,60)||!await rateLimit('bookings-global',100,60))return Response.json({error:'Too many requests. Please call us to arrange your table.'},{status:429});const id=randomUUID();await sql`insert into namche.reservations(id,name,email,phone,date,time,guests,notes) values(${id},${data.name},${data.email.toLowerCase()},${data.phone},${data.date},${data.time},${data.guests},${data.notes})`;try{await sendReservationEmails({...data,id,status:'pending'});}catch(error){console.error('Reservation email delivery failed',error);}return Response.json({id,message:'Your request is saved. Our team will contact you to confirm your table.'},{status:201});}catch{return Response.json({error:'We could not save your request. Please try again or call (613) 761-1616.'},{status:503});}}
+function closedDateResponse() {
+  return Response.json({error:CLOSED_DATE_MESSAGE,code:'RESERVATION_DATE_CLOSED'},{status:409});
+}
+
+export async function POST(request:Request) {
+  try {
+    if(!sameOrigin(request)) return Response.json({error:'Invalid request origin.'},{status:403});
+    const raw=await request.text();
+    if(raw.length>6000) return Response.json({error:'Request is too large.'},{status:413});
+    let input: unknown;
+    try { input=JSON.parse(raw); } catch { return Response.json({error:'Send a valid reservation request.'},{status:400}); }
+    const parsed=reservationSchema.safeParse(input);
+    if(!parsed.success) return Response.json({error:parsed.error.issues[0].message},{status:400});
+    const data=parsed.data;
+    if(await isReservationDateClosed(data.date)) return closedDateResponse();
+    if(!await rateLimit('booking:'+digest(data.email.toLowerCase()),3,60)||!await rateLimit('bookings-global',100,60)) {
+      return Response.json({error:'Too many requests. Please call us to arrange your table.'},{status:429});
+    }
+    // Recheck under the date lock in case staff closed it after the early check.
+    const id=await createReservation(data);
+    if(!id) return closedDateResponse();
+    try { await sendReservationEmails({...data,id,status:'pending'}); } catch(error) { console.error('Reservation email delivery failed',error); }
+    return Response.json({id,message:'Your request is saved. Our team will contact you to confirm your table.'},{status:201});
+  } catch {
+    return Response.json({error:'We could not save your request. Please try again or call (613) 761-1616.'},{status:503});
+  }
+}
