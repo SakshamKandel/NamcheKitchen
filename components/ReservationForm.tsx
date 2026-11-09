@@ -115,6 +115,7 @@ export default function ReservationForm() {
       ? `Please choose a date from ${formatDate(availability.today)} through ${formatDate(availability.maxDate)}.`
       : '';
   const closedDates = availability?.closedDates ?? [];
+  const hasAvailabilityNotice = availabilityStatus !== 'ready' || closedDates.length > 0;
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -162,41 +163,36 @@ export default function ReservationForm() {
         <span className="eyebrow">A PLACE AT OUR TABLE</span>
         <h2>LET’S MAKE PLANS.</h2>
       </div>
-      <div className={styles.availability} id="reservation-availability" aria-live="polite">
-        {availabilityStatus === 'loading' && <p role="status">Checking reservation availability…</p>}
-        {availabilityStatus === 'error' && (
-          <div role="alert">
-            <p>We couldn’t check availability. Please retry before sending your request. Your details will stay here.</p>
-            <button type="button" className={styles.retry} onClick={() => void refreshAvailability()}>Retry availability</button>
-          </div>
-        )}
-        {closedDates.length > 0 && (
-          <div>
-            <p><strong>Reservations are closed on:</strong></p>
-            <ul className={styles.closureList}>{closedDates.slice(0, 3).map(date => {
-              const reason = availability?.closures.find(closure => closure.date === date)?.reason;
-              return <li key={date}><time dateTime={date}>{formatDate(date)}</time>{reason && <span className={styles.closureReason}>{reason}</span>}</li>;
-            })}</ul>
-            {closedDates.length > 3 && (
-              <details className={styles.dates}>
-                <summary>View all {closedDates.length} closed dates</summary>
-                <ul>{closedDates.map(date => {
-                  const reason = availability?.closures.find(closure => closure.date === date)?.reason;
-                  return <li key={date}><time dateTime={date}>{formatDate(date)}</time>{reason && <span className={styles.closureReason}>{reason}</span>}</li>;
-                })}</ul>
-              </details>
-            )}
-          </div>
-        )}
-        {availabilityStatus === 'ready' && closedDates.length === 0 && availability && (
-          <p>Choose your preferred date through {formatDate(availability.maxDate)}.</p>
-        )}
-      </div>
+      {hasAvailabilityNotice && (
+        <div className={styles.availability} id="reservation-availability" aria-live="polite">
+          {availabilityStatus === 'loading' && <p role="status">Checking reservation availability…</p>}
+          {availabilityStatus === 'error' && (
+            <div role="alert">
+              <p>We couldn’t check availability. Please retry before sending your request. Your details will stay here.</p>
+              <button type="button" className={styles.retry} onClick={() => void refreshAvailability()}>Retry availability</button>
+            </div>
+          )}
+          {closedDates.length > 0 && (
+            <div>
+              <p><strong>Reservations are closed on:</strong></p>
+              <ul className={styles.closureList}>{closedDates.slice(0, 3).map(date => {
+                const reason = availability?.closures.find(closure => closure.date === date)?.reason;
+                return <li key={date}><time dateTime={date}>{formatDate(date)}</time>{reason && <span className={styles.closureReason}>{reason}</span>}</li>;
+              })}</ul>
+              {closedDates.length > 3 && (
+                <details className={styles.dates}>
+                  <summary>View all {closedDates.length} closed dates</summary>
+                  <ul>{closedDates.map(date => {
+                    const reason = availability?.closures.find(closure => closure.date === date)?.reason;
+                    return <li key={date}><time dateTime={date}>{formatDate(date)}</time>{reason && <span className={styles.closureReason}>{reason}</span>}</li>;
+                  })}</ul>
+                </details>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       <div className="form-grid">
-        <label>Your name<input name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Full name" /></label>
-        <label>Email address<input name="email" type="email" required maxLength={200} autoComplete="email" placeholder="you@example.com" /></label>
-        <label>Phone number<input name="phone" type="tel" required minLength={7} maxLength={25} autoComplete="tel" placeholder="(613) 000-0000" /></label>
-        <label>Guests<select name="guests" defaultValue="2">{Array.from({ length: 20 }, (_, index) => <option value={index + 1} key={index}>{index + 1} {index ? 'guests' : 'guest'}</option>)}</select></label>
         <label>Preferred date
           <input
             name="date"
@@ -207,11 +203,15 @@ export default function ReservationForm() {
             onChange={event => { setSelectedDate(event.target.value); setError(''); }}
             onFocus={() => void refreshAvailability()}
             aria-invalid={dateError ? true : undefined}
-            aria-describedby={dateError ? 'reservation-availability reservation-date-error' : 'reservation-availability'}
+            aria-describedby={dateError ? `reservation-availability reservation-date-error` : hasAvailabilityNotice ? 'reservation-availability' : undefined}
             required
           />
           {dateError && <span className={styles.dateError} id="reservation-date-error" role="alert">{dateError}</span>}
         </label>
+        <label>Your name<input name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Full name" /></label>
+        <label>Email address<input name="email" type="email" required maxLength={200} autoComplete="email" placeholder="you@example.com" /></label>
+        <label>Phone number<input name="phone" type="tel" required minLength={7} maxLength={25} autoComplete="tel" placeholder="(613) 000-0000" /></label>
+        <label>Guests<select name="guests" defaultValue="2">{Array.from({ length: 20 }, (_, index) => <option value={index + 1} key={index}>{index + 1} {index ? 'guests' : 'guest'}</option>)}</select></label>
         <label>Preferred time (Ottawa)<input name="time" type="time" required /></label>
         <label className="span-2">Anything we should know? <span className="optional">Optional</span><textarea name="notes" rows={3} maxLength={1000} placeholder="A special occasion, accessibility needs, or dietary requirements…" /></label>
       </div>
